@@ -1,11 +1,13 @@
 
+using IceSync.Domain;
 using IceSync.WebApp;
+using Microsoft.EntityFrameworkCore;
 
 namespace IceSync.WebApi
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -31,8 +33,13 @@ namespace IceSync.WebApi
             app.UseAuthorization();
 
             app.MapControllers();
+            
+            //Migrate Database
+            using var scope = app.Services.CreateScope();
+            await using var dbContext = scope.ServiceProvider.GetRequiredService<IceSyncDbContext>();
+            await dbContext.Database.MigrateAsync();
 
-            app.Run();
+            await app.RunAsync();
         }
     }
 }

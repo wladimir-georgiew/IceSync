@@ -1,9 +1,10 @@
 ﻿using IceSync.Common;
+using IceSync.Domain;
 using IceSync.WebApp.Contracts;
 using IceSync.WebApp.Services;
 using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using UniversalLoaderClient;
 using UniversalLoaderClient.Contracts;
 using UniversalLoaderClient.Services;
 
@@ -14,8 +15,8 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddWebAppServices(this IServiceCollection services, IConfiguration configuration)
     {
         // Client Registrations
-        RegisterUniLoaderClientBuilder(services, configuration);
         RegisterDatabase(services, configuration);
+        RegisterUniLoaderClientBuilder(services, configuration);
         
         // Service Registrations
         services.AddHostedService<MonitoringBackgroundService>();
@@ -25,9 +26,14 @@ public static class ServiceCollectionExtensions
         return services;
     }
     
-    private static void RegisterDatabase(IServiceCollection services, IConfiguration  configuration)
+    private static void RegisterDatabase(IServiceCollection services, IConfiguration configuration)
     {
-        
+        var connectionString = configuration.GetConnectionString("IceSyncDatabase");
+
+        services.AddDbContext<IceSyncDbContext>(options =>
+        {
+            options.UseSqlServer(connectionString);
+        });
     }
 
     private static void RegisterUniLoaderClientBuilder(IServiceCollection services, IConfiguration  configuration)
