@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace IceSync.WebApp.Controllers
+namespace IceSync.WebApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]

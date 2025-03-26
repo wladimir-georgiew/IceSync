@@ -1,5 +1,7 @@
 
-namespace IceSync.WebApp
+using IceSync.WebApp;
+
+namespace IceSync.WebApi
 {
     public class Program
     {
@@ -9,6 +11,7 @@ namespace IceSync.WebApp
 
             // Add services to the container.
 
+            builder.Services.AddWebAppServices(builder.Configuration);
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -26,7 +29,6 @@ namespace IceSync.WebApp
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-
 
             app.MapControllers();
 
