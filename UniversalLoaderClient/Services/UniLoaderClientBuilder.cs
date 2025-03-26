@@ -9,7 +9,6 @@ public class UniLoaderClientBuilder(IHttpClientFactory factory) : IUniLoaderClie
     public IUniLoaderClient Build(string? authToken = "")
     {
         HttpClient client = factory.CreateClient(HttpClientNameConstants.UniLoaderApi);
-        //client.BaseAddress = new Uri(url);
         
         if (!string.IsNullOrWhiteSpace(authToken))
         {

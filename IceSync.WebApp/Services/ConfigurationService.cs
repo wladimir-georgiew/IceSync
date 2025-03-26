@@ -9,10 +9,10 @@ public class ConfigurationService(IConfiguration Configuration) : IConfiguration
     public Configuration GetConfiguration()
     {
         var monitoringTriggerTime = Configuration.GetSection("Services").GetSection("UniversalLoader")
-            .GetValue<string>("MonitoringTriggerTimeMinutes");
+            .GetValue<int>("MonitoringTriggerTimeMinutes");
         return new Configuration()
         {
-            MonitoringTriggerTime = TimeSpan.FromMinutes(Convert.ToDouble(monitoringTriggerTime)),
+            MonitoringTriggerTime = TimeSpan.FromMinutes(monitoringTriggerTime),
             Credentials = new Credentials()
             {
               CompanyId  = Configuration.GetSection("Services").GetSection("UniversalLoader").GetSection("Credentials")

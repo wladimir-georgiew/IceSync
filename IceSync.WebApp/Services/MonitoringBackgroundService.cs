@@ -1,32 +1,24 @@
-﻿using IceSync.Common.Contracts.UniLoader.AuthV2;
-using IceSync.WebApp.Contracts;
-using IceSync.WebApp.DTOs;
+﻿using IceSync.WebApp.Contracts;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using UniversalLoaderClient.Contracts;
 
 namespace IceSync.WebApp.Services;
 
-public class MonitoringBackgroundService(IServiceProvider serviceProvider, IConfigurationService configurationService) : BackgroundService
+public class MonitoringBackgroundService(ILogger<MonitoringBackgroundService> logger, IServiceProvider serviceProvider,
+    IConfigurationService configurationService, IUniLoaderClientBuilder clientBuilder, IAuthCacheService authCacheService)
+    : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var configuration = configurationService.GetConfiguration();
-        var authBearerToken = string.Empty;
-        var authExpiresAt = DateTime.UtcNow;
         
         while (!stoppingToken.IsCancellationRequested)
         {
             var scope = serviceProvider.CreateScope();
-            var clientBuilder = scope.ServiceProvider.GetRequiredService<IUniLoaderClientBuilder>();
 
-            // Needs authenticating
-            if (string.IsNullOrWhiteSpace(authBearerToken) || DateTime.UtcNow > authExpiresAt - TimeSpan.FromSeconds(10))
-            {
-                var authResult = await AuthenticateAsync(clientBuilder, configuration.Credentials);
-                authBearerToken = authResult.BearerToken;
-                authExpiresAt = authResult.ExpiresAt;
-            }
+            var authBearerToken = await authCacheService.GetBearerTokenAsync();
             
             var client = clientBuilder.Build(authBearerToken);
             
@@ -38,29 +30,5 @@ public class MonitoringBackgroundService(IServiceProvider serviceProvider, IConf
             
             await Task.Delay(configuration.MonitoringTriggerTime ,stoppingToken);
         }
-    }
-
-    private async Task<AuthenticationResult> AuthenticateAsync(IUniLoaderClientBuilder clientBuilder, Credentials credentials)
-    {
-        var client = clientBuilder.Build();
-        var authRequest = new AuthV2Request()
-        {
-            ApiCompanyId = credentials.CompanyId,
-            ApiUserId = credentials.UserId,
-            ApiUserSecret = credentials.Secret,
-        };
-                
-        var authResponse = await client.Authentication.AuthenticateAsync(authRequest);
-
-        if (!authResponse.Success)
-        {
-            throw new Exception($"Auth failed - Code: {authResponse.Error.Code}, MSG: {authResponse.Error.Message}");
-        }
-
-        return new AuthenticationResult
-        {
-            BearerToken = authResponse.Data.TokenType + " " + authResponse.Data.AccessToken,
-            ExpiresAt = DateTime.UtcNow.AddSeconds(authResponse.Data.ExpiresIn)
-        };
     }
 }

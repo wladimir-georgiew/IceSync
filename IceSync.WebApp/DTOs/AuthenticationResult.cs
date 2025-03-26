@@ -2,6 +2,6 @@
 
 public record AuthenticationResult
 {
-    public string BearerToken { get; set; }
-    public DateTime ExpiresAt { get; set; }
+    public string BearerToken { get; init; }
+    public int ExpiresIn { get; init; }
 }
