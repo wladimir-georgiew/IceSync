@@ -22,7 +22,7 @@ public class MonitoringBackgroundService(
     {
         try
         {
-            await StartAsync(stoppingToken);
+            await RunAsync(stoppingToken);
         }
         catch (Exception ex)
         {
@@ -31,7 +31,7 @@ public class MonitoringBackgroundService(
         }
     }
 
-    private async Task StartAsync(CancellationToken stoppingToken)
+    private async Task RunAsync(CancellationToken stoppingToken)
     {
         var configuration = configurationService.GetConfiguration();
 
@@ -47,7 +47,7 @@ public class MonitoringBackgroundService(
             {
                 logger.LogError(
                     "Failed to fetch workflows from UniLoader api.. Reason: {Message}, Code: {Code}. Try again in {TriggerTime}",
-                    uniLoaderWorkflowsResponse.Error.Message, uniLoaderWorkflowsResponse.Error.Code, configuration.MonitoringTriggerTime);
+                    uniLoaderWorkflowsResponse.Error?.Message, uniLoaderWorkflowsResponse.Error?.Code, configuration.MonitoringTriggerTime);
 
                 await Task.Delay(configuration.MonitoringTriggerTime, stoppingToken);
                 return;
@@ -60,7 +60,7 @@ public class MonitoringBackgroundService(
 
             scope.Dispose();
             
-            logger.LogInformation("Synchronization completed, next one triggers in {waitTime} ..", configuration.MonitoringTriggerTime);
+            logger.LogWarning("Synchronization completed, next one triggers in {waitTime} ..", configuration.MonitoringTriggerTime);
             await Task.Delay(configuration.MonitoringTriggerTime, stoppingToken);
         }
     }
@@ -84,7 +84,7 @@ public class MonitoringBackgroundService(
                 };
                 dbContext.Add(newWorkflow);
                     
-                logger.LogInformation("ADD workflow - {entity}", JsonConvert.SerializeObject(newWorkflow));
+                logger.LogWarning("ADD workflow - {entity}", JsonConvert.SerializeObject(newWorkflow));
             }
             // 3. For all other workflows update the fields in the database with the values returned from the API
             else
@@ -93,7 +93,7 @@ public class MonitoringBackgroundService(
                 existingWorkflowEntity.IsActive = apiWorkflow.IsActive;
                 existingWorkflowEntity.MultiExecBehavior = apiWorkflow.MultiExecBehavior;
 
-                logger.LogInformation("UPDATE workflow - {entity}, with new values: Name: {Name}, IsActive: {IsActive}, MultiExecBehavior: {MultiExec}",
+                logger.LogWarning("UPDATE workflow - {entity}, with new values: Name: {Name}, IsActive: {IsActive}, MultiExecBehavior: {MultiExec}",
                     JsonConvert.SerializeObject(existingWorkflowEntity), apiWorkflow.Name, apiWorkflow.IsActive, apiWorkflow.MultiExecBehavior);
             }
         }
@@ -106,7 +106,7 @@ public class MonitoringBackgroundService(
         {
             dbContext.Workflows.RemoveRange(workflowsToRemove);
                 
-            logger.LogInformation("DELETE workflows with the following IDS - {workflows}", workflowsToRemove.Select(x => x.WorkflowId));
+            logger.LogWarning("DELETE workflows with the following IDS - {workflows}", workflowsToRemove.Select(x => x.WorkflowId));
         }
             
         await dbContext.SaveChangesAsync(stoppingToken);

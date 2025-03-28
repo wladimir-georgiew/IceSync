@@ -12,9 +12,9 @@ public class Workflows(Requester requester)
         return await requester.SendRequestAsync<List<Workflow>>(HttpMethod.Get, url);
     }
     
-    public async Task<BaseResult> RunAsync(WorkflowRunRequest request)
+    public async Task<BaseResult> RunAsync(int workflowId, WorkflowRunRequest? request)
     {
-        string url = $"workflows/{request.WorkflowId}/run";
+        string url = $"workflows/{workflowId}/run";
         return await requester.SendRequestAsync(HttpMethod.Post, url, request);
     }
 }

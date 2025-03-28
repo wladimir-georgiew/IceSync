@@ -127,7 +127,7 @@ public class Requester(HttpClient httpClient)
 		}
 
 		Error? error = null;
-		if (!string.IsNullOrWhiteSpace(responseData.Error))
+		if (!string.IsNullOrWhiteSpace(responseData?.Error))
 		{
 			error = new()
 			{

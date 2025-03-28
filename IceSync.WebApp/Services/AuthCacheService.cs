@@ -28,13 +28,13 @@ public class AuthCacheService : IAuthCacheService
         await _semaphore.WaitAsync();
         try
         {
-            if (_token == null || DateTime.UtcNow >= _expiresAt)
+            if (string.IsNullOrWhiteSpace(_token) || DateTime.UtcNow >= _expiresAt)
             {
-                _logger.LogInformation("AccessToken missing or expired, attempting to get new one..");
+                _logger.LogWarning("AccessToken missing or expired, attempting to get new one..");
                 await RefreshTokenAsync();
             }
                 
-            _logger.LogInformation("Successfully retrieved AccessToken. Expires at {ExpiresAt}.", _expiresAt);
+            _logger.LogWarning("Successfully retrieved AccessToken. Expires at {ExpiresAt}.", _expiresAt);
             return _token;
         }
         finally
@@ -63,9 +63,9 @@ public class AuthCacheService : IAuthCacheService
                 
         var authResponse = await uniLoaderClient.Authentication.AuthenticateAsync(authRequest);
 
-        if (!authResponse.Success)
+        if (!authResponse.Success || authResponse.Data is null)
         {
-            throw new Exception($"Auth failed - Code: {authResponse.Error.Code}, MSG: {authResponse.Error.Message}");
+            throw new Exception($"Auth failed - Code: {authResponse.Error?.Code}, MSG: {authResponse.Error?.Message}");
         }
 
         return new AuthenticationResult
