@@ -12,12 +12,14 @@ namespace IceSync.WebApi
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
             builder.Services.AddWebAppServices(builder.Configuration);
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            
+            // Suppress EF info logs
+            builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning);
+            builder.Logging.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning);
 
             var app = builder.Build();
 

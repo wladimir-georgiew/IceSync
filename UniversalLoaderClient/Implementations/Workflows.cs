@@ -6,10 +6,10 @@ namespace UniversalLoaderClient.Implementations;
 
 public class Workflows(Requester requester)
 {
-    public async Task<BaseResult<List<Workflows>>> AllAsync()
+    public async Task<BaseResult<List<Workflow>>> AllAsync()
     {
         string url = $"workflows";
-        return await requester.SendRequestAsync<List<Workflows>>(HttpMethod.Get, url);
+        return await requester.SendRequestAsync<List<Workflow>>(HttpMethod.Get, url);
     }
     
     public async Task<BaseResult> RunAsync(WorkflowRunRequest request)

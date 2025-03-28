@@ -30,9 +30,11 @@ public class AuthCacheService : IAuthCacheService
         {
             if (_token == null || DateTime.UtcNow >= _expiresAt)
             {
+                _logger.LogInformation("AccessToken missing or expired, attempting to get new one..");
                 await RefreshTokenAsync();
             }
-
+                
+            _logger.LogInformation("Successfully retrieved AccessToken. Expires at {ExpiresAt}.", _expiresAt);
             return _token;
         }
         finally
@@ -65,8 +67,6 @@ public class AuthCacheService : IAuthCacheService
         {
             throw new Exception($"Auth failed - Code: {authResponse.Error.Code}, MSG: {authResponse.Error.Message}");
         }
-                
-        _logger.LogDebug("Successfully retrieved new AccessToken. Expires in {ExpiresIn} seconds.", authResponse.Data.ExpiresIn);
 
         return new AuthenticationResult
         {

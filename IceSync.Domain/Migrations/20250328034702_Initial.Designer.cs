@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IceSync.Domain.Migrations
 {
     [DbContext(typeof(IceSyncDbContext))]
-    [Migration("20250326163049_Initial")]
+    [Migration("20250328034702_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -26,23 +26,30 @@ namespace IceSync.Domain.Migrations
 
             modelBuilder.Entity("IceSync.Domain.Entities.WorkflowEntity", b =>
                 {
-                    b.Property<int>("WorkflowId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WorkflowId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<int>("MultiExecBehavior")
+                    b.Property<string>("MultiExecBehavior")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("WorkflowId")
                         .HasColumnType("int");
 
                     b.Property<string>("WorkflowName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("WorkflowId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("WorkflowId")
+                        .IsUnique();
 
                     b.ToTable("Workflows");
                 });
