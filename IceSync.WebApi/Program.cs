@@ -21,7 +21,16 @@ namespace IceSync.WebApi
             builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning);
             builder.Logging.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning);
 
+            builder.Services.AddSpaStaticFiles(configuration =>
+            {
+                configuration.RootPath = "wwwroot";
+            });
+            
             var app = builder.Build();
+            
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
+            app.UseSpaStaticFiles();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -36,10 +45,13 @@ namespace IceSync.WebApi
 
             app.MapControllers();
             
+            app.MapFallbackToFile("index.html");
+            
             //Migrate Database
             using var scope = app.Services.CreateScope();
             await using var dbContext = scope.ServiceProvider.GetRequiredService<IceSyncDbContext>();
             await dbContext.Database.MigrateAsync();
+            
 
             await app.RunAsync();
         }
